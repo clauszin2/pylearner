@@ -107,6 +107,13 @@ export const CURRICULUM: Chapter[] = [
         exercisePrompt: `Completa la funzione 'calcola_media' per calcolare e restituire la media di un numero qualsiasi di argomenti. Se non vengono passati numeri (la tupla 'numeri' è vuota), la funzione dovrebbe restituire 0.`,
         solution: `def calcola_media(*numeri):\n    if not numeri:\n        return 0\n    return sum(numeri) / len(numeri)\n\nprint(f"Media 1: {calcola_media(10, 20, 30)}")\nprint(f"Media 2: {calcola_media(5, 10, 15, 20)}")`
       },
+      {
+        title: 'Lambda, Map e Filter',
+        content: `Python offre strumenti per uno stile di programmazione più 'funzionale'. Le funzioni 'lambda' sono piccole funzioni anonime. 'map()' applica una funzione a tutti gli elementi di un iterabile (es. una lista). 'filter()' costruisce un iteratore dagli elementi di un iterabile per cui una funzione restituisce True.`,
+        starterCode: `numeri = [1, 2, 3, 4, 5]\n\n# Usa map e una funzione lambda per creare una lista con i quadrati di ogni numero\nquadrati = list(map(lambda x: x**2, numeri))\n\nprint(f"Quadrati: {quadrati}")`,
+        exercisePrompt: `Data la lista 'nomi', usa 'filter' e una funzione 'lambda' per creare una nuova lista che contenga solo i nomi che iniziano con la lettera 'A'.`,
+        solution: `nomi = ["Anna", "Bruno", "Alberto", "Carla"]\nnomi_con_a = list(filter(lambda nome: nome.startswith('A'), nomi))\nprint(f"Nomi che iniziano con A: {nomi_con_a}")`
+      },
     ]
   },
   {
@@ -140,6 +147,13 @@ export const CURRICULUM: Chapter[] = [
             exercisePrompt: `Implementa i metodi '__str__' e '__len__'. '__str__' dovrebbe restituire una stringa come 'Mazzo con 16 carte'. '__len__' dovrebbe restituire il numero effettivo di carte nella lista 'self.carte'.`,
             solution: `class MazzoDiCarte:\n    def __init__(self):\n        self.carte = ["Asso", "Re", "Regina", "Jack"] * 4\n\n    def __str__(self):\n        return f"Mazzo con {len(self.carte)} carte"\n\n    def __len__(self):\n        return len(self.carte)\n\nmazzo = MazzoDiCarte()\nprint(mazzo)\nprint(f"Numero di carte: {len(mazzo)}")`
         },
+         {
+            title: 'Metodi Statici e di Classe',
+            content: `Oltre ai metodi di istanza (che usano 'self'), le classi possono avere metodi statici e metodi di classe. Un 'metodo statico' (decorato con @staticmethod) è come una normale funzione che vive dentro una classe; non riceve né l'istanza né la classe. Un 'metodo di classe' (decorato con @classmethod) riceve la classe stessa come primo argomento, convenzionalmente chiamato 'cls'. È spesso usato per creare 'factory methods'.`,
+            starterCode: `import datetime\n\nclass Utente:\n    def __init__(self, nome, eta):\n        self.nome = nome\n        self.eta = eta\n\n    @staticmethod\n    def is_maggiorenne(eta):\n        return eta >= 18\n\n    # Crea un metodo di classe qui\n\n# Esempio di utilizzo\nprint(f"Un 20enne è maggiorenne? {Utente.is_maggiorenne(20)}")`,
+            exercisePrompt: `Aggiungi un metodo di classe chiamato 'from_anno_nascita'. Deve prendere 'nome' e 'anno_nascita' come argomenti, calcolare l'età corrente e restituire una nuova istanza della classe 'Utente' con i dati corretti.`,
+            solution: `import datetime\n\nclass Utente:\n    def __init__(self, nome, eta):\n        self.nome = nome\n        self.eta = eta\n\n    @staticmethod\n    def is_maggiorenne(eta):\n        return eta >= 18\n\n    @classmethod\n    def from_anno_nascita(cls, nome, anno_nascita):\n        anno_corrente = datetime.date.today().year\n        eta = anno_corrente - anno_nascita\n        return cls(nome, eta)\n\n# Esempio\nutente_nato_nel_2000 = Utente.from_anno_nascita("Giulia", 2000)\nprint(f"Nome: {utente_nato_nel_2000.nome}, Età: {utente_nato_nel_2000.eta}")`
+        },
     ]
   },
   {
@@ -158,7 +172,14 @@ export const CURRICULUM: Chapter[] = [
         starterCode: `def conto_alla_rovescia(n):\n    print("Inizio conto alla rovescia!")\n    while n > 0:\n        # 'yield' invia un valore e mette in pausa la funzione\n        n -= 1\n\n# Itera sul generatore\nfor numero in conto_alla_rovescia(3):\n    print(numero)`,
         exercisePrompt: `Completa la funzione generatore 'conto_alla_rovescia'. Dovrebbe usare 'yield' per restituire il valore corrente di 'n' all'interno del ciclo 'while', prima di decrementarlo.`,
         solution: `def conto_alla_rovescia(n):\n    print("Inizio conto alla rovescia!")\n    while n > 0:\n        yield n\n        n -= 1\n\nprint("Conto alla rovescia da 3:")\nfor numero in conto_alla_rovescia(3):\n    print(numero)`
-      }
+      },
+      {
+        title: 'Context Manager (with)',
+        content: `Abbiamo già visto il costrutto 'with' per i file. Questo funziona grazie al 'context manager protocol'. Qualsiasi oggetto che implementi i metodi speciali '__enter__' e '__exit__' può essere usato con 'with'. Questo è utilissimo per gestire risorse che hanno bisogno di una fase di setup e una di teardown (come connessioni a database, lock, etc.).`,
+        starterCode: `import time\n\nclass Timer:\n    def __enter__(self):\n        # Codice da eseguire all'inizio del blocco 'with'\n        print("Timer avviato.")\n        return self\n\n    def __exit__(self, exc_type, exc_val, exc_tb):\n        # Codice da eseguire alla fine del blocco 'with'\n        print("Timer fermato.")\n\n# Usiamo il nostro context manager\nwith Timer():\n    print("Eseguo un'operazione...")\n    time.sleep(1)\nprint("Operazione terminata.")`,
+        exercisePrompt: `Migliora la classe Timer. Nel metodo '__enter__', salva il tempo di inizio (usando time.time()) in un attributo di istanza (es. self.start_time). Nel metodo '__exit__', calcola il tempo trascorso e stampalo.`,
+        solution: `import time\n\nclass Timer:\n    def __enter__(self):\n        self.start_time = time.time()\n        print("Timer avviato.")\n        return self\n\n    def __exit__(self, exc_type, exc_val, exc_tb):\n        end_time = time.time()\n        tempo_trascorso = end_time - self.start_time\n        print(f"Timer fermato. Tempo trascorso: {tempo_trascorso:.4f} secondi.")\n\nwith Timer():\n    print("Eseguo un'operazione...")\n    time.sleep(1)\nprint("Operazione terminata.")`
+      },
     ]
   },
   {
@@ -213,6 +234,13 @@ export const CURRICULUM: Chapter[] = [
         exercisePrompt: "Completa il codice. Prima, usa `.fillna()` per sostituire i valori NaN nella colonna 'B' con il valore 0. Poi, usa `.dropna()` per rimuovere le righe che hanno ancora valori NaN (che a questo punto sarà solo la riga della colonna 'A'). Stampa il DataFrame pulito.",
         solution: `import pandas as pd\nimport numpy as np\n\ndati = {\n    'A': [1, 2, np.nan, 4],\n    'B': [5, np.nan, np.nan, 8],\n    'C': [10, 20, 30, 40]\n}\ndf = pd.DataFrame(dati)\n\nprint("DataFrame originale:")\nprint(df)\n\ndf['B'] = df['B'].fillna(0)\ndf_pulito = df.dropna()\n\nprint("\\nDataFrame pulito:")\nprint(df_pulito)`
       },
+       {
+        title: 'Istogrammi con Matplotlib',
+        content: `Un istogramma è un tipo di grafico essenziale per capire la distribuzione di una singola variabile numerica. Mostra la frequenza con cui i valori cadono all'interno di determinati intervalli (chiamati 'bins'). È uno strumento fondamentale per l'analisi esplorativa dei dati. Si crea con 'plt.hist()'.`,
+        starterCode: `import matplotlib.pyplot as plt\nimport numpy as np\n\n# Genera 1000 numeri casuali da una distribuzione normale\nnp.random.seed(0)\ndati_distribuzione = np.random.randn(1000)\n\n# Crea un istogramma qui`,
+        exercisePrompt: `Usa Matplotlib per creare un istogramma della variabile 'dati_distribuzione'. Usa il parametro 'bins=30' per dividere i dati in 30 intervalli. Aggiungi un titolo appropriato al grafico, come "Distribuzione dei Dati".`,
+        solution: `import matplotlib.pyplot as plt\nimport numpy as np\n\nnp.random.seed(0)\ndati_distribuzione = np.random.randn(1000)\n\nplt.hist(dati_distribuzione, bins=30)\nplt.title("Distribuzione dei Dati")\nplt.xlabel("Valore")\nplt.ylabel("Frequenza")\n\nprint("Codice per l'istogramma generato correttamente.")`
+      },
       {
         title: 'Grafici a Dispersione (Scatter Plot)',
         content: "Un grafico a dispersione (scatter plot) è ideale per visualizzare la relazione tra due variabili numeriche. Ogni punto nel grafico rappresenta un'osservazione. Questo tipo di grafico può aiutarti a identificare correlazioni, cluster o valori anomali (outlier) nei tuoi dati. In Matplotlib, si crea con `plt.scatter()`.",
@@ -222,4 +250,30 @@ export const CURRICULUM: Chapter[] = [
       }
     ],
   },
+  {
+    title: 'Interagire con il Web (API)',
+    lessons: [
+      {
+        title: 'Introduzione a API e JSON',
+        content: `Un'API (Application Programming Interface) è un modo per due programmi di comunicare tra loro. Molte API web restituiscono dati in formato JSON (JavaScript Object Notation), un formato testuale leggero e facile da leggere sia per gli umani che per le macchine. Python ha un modulo integrato, 'json', per lavorare con questi dati.`,
+        starterCode: `import json\n\n# Questa è una stringa che contiene dati in formato JSON\njson_string = '{"nome": "Luca", "eta": 28, "citta": "Firenze"}'\n\n# Converti la stringa JSON in un dizionario Python\ndati_python = json.loads(json_string)\n\nprint(f"Tipo di dati: {type(dati_python)}")\nprint(f"Dati: {dati_python}")`,
+        exercisePrompt: `Data la variabile 'dati_python', accedi e stampa il valore associato alla chiave 'citta'.`,
+        solution: `import json\n\njson_string = '{"nome": "Luca", "eta": 28, "citta": "Firenze"}'\ndati_python = json.loads(json_string)\n\nprint(f"La città è: {dati_python['citta']}")`
+      },
+      {
+        title: 'Fare Richieste HTTP con `requests`',
+        content: `Per comunicare con un'API web, dobbiamo inviare una richiesta HTTP a un URL specifico (chiamato 'endpoint'). La libreria 'requests' è lo standard di fatto in Python per fare questo. Il tipo di richiesta più comune è 'GET', usata per recuperare dati. La risposta contiene uno status code (200 significa OK) e i dati richiesti.`,
+        starterCode: `import requests\n\n# Un endpoint di un\'API pubblica di test\nurl = "https://jsonplaceholder.typicode.com/todos/1"\n\n# Fai una richiesta GET\nresponse = requests.get(url)\n\nprint(f"Status Code: {response.status_code}")\n# .json() converte direttamente la risposta JSON in un dizionario Python\nprint(f"Dati: {response.json()}")`,
+        exercisePrompt: `Modifica l'URL per richiedere i dati del "todo" con ID 5. Poi, converti la risposta JSON in un dizionario Python e stampa solo il valore della chiave 'title'.`,
+        solution: `import requests\n\nurl = "https://jsonplaceholder.typicode.com/todos/5"\n\nresponse = requests.get(url)\n\nif response.status_code == 200:\n    dati = response.json()\n    print(f"Titolo del todo 5: {dati['title']}")\nelse:\n    print(f"Errore: Status Code {response.status_code}")`
+      },
+      {
+        title: 'Esempio Pratico: PokéAPI',
+        content: `Mettiamo tutto insieme! Useremo la PokéAPI, un'API pubblica e gratuita, per recuperare informazioni su un Pokémon. Costruiremo l'URL con il nome del Pokémon, faremo la richiesta GET, controlleremo se la richiesta è andata a buon fine e infine estrarremo e stamperemo i dati che ci interessano.`,
+        starterCode: `import requests\n\npokemon_nome = "ditto" # Prova a cambiarlo con "charmander" o "squirtle"!\nurl = f"https://pokeapi.co/api/v2/pokemon/{pokemon_nome}"\n\nresponse = requests.get(url)\n\nif response.status_code == 200:\n    dati = response.json()\n    # Estrai e stampa i dati qui!\n    print(f"Hai trovato {dati['name'].capitalize()}!")\nelse:\n    print(f"Errore: Pokémon non trovato o API non disponibile. Status: {response.status_code}")`,
+        exercisePrompt: `Completa il codice. Dopo aver controllato che la richiesta sia andata a buon fine, estrai e stampa il numero (ID), l'altezza (height) e il peso (weight) del Pokémon dal dizionario 'dati'.`,
+        solution: `import requests\n\npokemon_nome = "ditto"\nurl = f"https://pokeapi.co/api/v2/pokemon/{pokemon_nome}"\n\nresponse = requests.get(url)\n\nif response.status_code == 200:\n    dati = response.json()\n    print(f"Nome: {dati['name'].capitalize()}")\n    print(f"ID: {dati['id']}")\n    print(f"Altezza: {dati['height']}")\n    print(f"Peso: {dati['weight']}")\nelse:\n    print(f"Errore: Pokémon non trovato o API non disponibile. Status: {response.status_code}")`
+      },
+    ]
+  }
 ];
