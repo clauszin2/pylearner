@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import LessonPanel from './components/LessonPanel';
@@ -5,8 +6,14 @@ import CodeEditor from './components/CodeEditor';
 import OutputConsole from './components/OutputConsole';
 import Header from './components/Header';
 import { CURRICULUM } from './constants';
-import { runPythonCode, explainCode } from './services/geminiService';
+import { explainCode } from './services/geminiService';
 import type { Lesson } from './types';
+
+declare global {
+  interface Window {
+    loadPyodide: (options?: { indexURL: string }) => Promise<any>;
+  }
+}
 
 const App: React.FC = () => {
   const [currentChapterIndex, setCurrentChapterIndex] = useState<number>(0);
@@ -14,31 +21,73 @@ const App: React.FC = () => {
   const [userCode, setUserCode] = useState<string>('');
   const [output, setOutput] = useState<string>("L'output del tuo codice apparirà qui.");
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [pyodide, setPyodide] = useState<any | null>(null);
+  const [isPyodideLoading, setIsPyodideLoading] = useState<boolean>(true);
 
   const currentLesson: Lesson = CURRICULUM[currentChapterIndex].lessons[currentLessonIndexInChapter];
 
   useEffect(() => {
+    async function loadPyodideInstance() {
+      setOutput("Caricamento dell'interprete Python in locale (Pyodide)...");
+      try {
+        const pyodideInstance = await window.loadPyodide();
+        setOutput('Caricamento pacchetti per Data Science (NumPy, Pandas)...');
+        await pyodideInstance.loadPackage(['numpy', 'pandas', 'matplotlib']);
+        setPyodide(pyodideInstance);
+        setIsPyodideLoading(false);
+        setOutput("Interprete Python pronto. Esegui il codice in locale!");
+      } catch (error) {
+        console.error("Failed to load Pyodide:", error);
+        setOutput("Errore durante il caricamento dell'interprete Python locale. L'esecuzione del codice non sarà disponibile.");
+        setIsPyodideLoading(false);
+      }
+    }
+    loadPyodideInstance();
+  }, []);
+  
+  useEffect(() => {
     setUserCode(currentLesson.starterCode);
-    setOutput(`Benvenuto/a alla lezione: ${currentLesson.title}.\nScrivi il codice e premi 'Esegui Codice'.`);
-  }, [currentChapterIndex, currentLessonIndexInChapter, currentLesson]);
+    if (!isPyodideLoading) {
+      setOutput(`Benvenuto/a alla lezione: ${currentLesson.title}.\nScrivi il codice e premi 'Esegui Codice'.`);
+    }
+  }, [currentChapterIndex, currentLessonIndexInChapter, currentLesson, isPyodideLoading]);
 
   const handleRunCode = useCallback(async () => {
+    if (isPyodideLoading || !pyodide) {
+      setOutput("L'interprete Python locale non è ancora pronto.");
+      return;
+    }
     if (!userCode.trim()) {
       setOutput("Errore: L'editor di codice è vuoto.");
       return;
     }
+
     setIsLoading(true);
-    setOutput('Esecuzione del codice...');
+    setOutput('Esecuzione in locale...');
+
+    const outputLines: string[] = [];
+    pyodide.setStdout({ batched: (str: string) => outputLines.push(str) });
+    pyodide.setStderr({ batched: (str: string) => outputLines.push(str) });
+
     try {
-      const result = await runPythonCode(userCode);
-      setOutput(result);
-    } catch (error) {
-      console.error('Error running code:', error);
-      setOutput('Si è verificato un errore durante l\'esecuzione del codice. Controlla la console per i dettagli.');
+      // Carica i namespace per pandas, numpy e matplotlib
+      await pyodide.runPythonAsync(`
+        import pandas as pd
+        import numpy as np
+        import matplotlib.pyplot as plt
+      `);
+      await pyodide.runPythonAsync(userCode);
+      const result = outputLines.join('\n');
+      setOutput(result || "Il codice è stato eseguito senza produrre output.");
+    } catch (error: any) {
+      setOutput(error.message);
     } finally {
       setIsLoading(false);
+      // Resetta gli stream per non accumulare output tra le esecuzioni
+      pyodide.setStdout({});
+      pyodide.setStderr({});
     }
-  }, [userCode]);
+  }, [userCode, pyodide, isPyodideLoading]);
 
   const handleExplainCode = useCallback(async () => {
     if (!userCode.trim()) {
@@ -46,7 +95,7 @@ const App: React.FC = () => {
       return;
     }
     setIsLoading(true);
-    setOutput('Spiegazione del codice in corso...');
+    setOutput('Spiegazione del codice in corso (via API)...');
     try {
       const explanation = await explainCode(userCode);
       setOutput(explanation);
@@ -105,6 +154,7 @@ const App: React.FC = () => {
               onRunCode={handleRunCode}
               onExplainCode={handleExplainCode}
               isLoading={isLoading}
+              isPyodideLoading={isPyodideLoading}
             />
             <OutputConsole output={output} />
           </div>

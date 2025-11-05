@@ -9,9 +9,10 @@ interface CodeEditorProps {
   onRunCode: () => void;
   onExplainCode: () => void;
   isLoading: boolean;
+  isPyodideLoading: boolean;
 }
 
-const CodeEditor: React.FC<CodeEditorProps> = ({ code, onCodeChange, onRunCode, onExplainCode, isLoading }) => {
+const CodeEditor: React.FC<CodeEditorProps> = ({ code, onCodeChange, onRunCode, onExplainCode, isLoading, isPyodideLoading }) => {
   return (
     <div className="bg-gray-800 rounded-lg shadow-lg flex flex-col h-full border border-gray-700">
       <div className="flex justify-between items-center p-3 bg-gray-700/50 rounded-t-lg border-b border-gray-700">
@@ -21,16 +22,16 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ code, onCodeChange, onRunCode, 
             onClick={onExplainCode}
             disabled={isLoading}
             className="flex items-center gap-2 bg-yellow-500 text-gray-900 font-bold py-2 px-4 rounded-md hover:bg-yellow-600 transition-colors duration-200 disabled:bg-yellow-800 disabled:cursor-not-allowed text-sm"
-            title="Spiega questo codice"
+            title="Spiega questo codice (richiede API)"
           >
             <LightbulbIcon className="w-4 h-4" />
             Spiega
           </button>
           <button
             onClick={onRunCode}
-            disabled={isLoading}
+            disabled={isLoading || isPyodideLoading}
             className="flex items-center gap-2 bg-green-500 text-white font-bold py-2 px-4 rounded-md hover:bg-green-600 transition-colors duration-200 disabled:bg-green-800 disabled:cursor-not-allowed text-sm"
-            title="Esegui il codice"
+            title={isPyodideLoading ? "Interprete Python in caricamento..." : "Esegui il codice (locale)"}
           >
             <PlayIcon className="w-4 h-4" />
             Esegui Codice
@@ -45,9 +46,12 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ code, onCodeChange, onRunCode, 
           placeholder="Scrivi il tuo codice Python qui..."
           spellCheck="false"
         />
-        {isLoading && (
+        {(isLoading || isPyodideLoading) && (
           <div className="absolute inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-400"></div>
+             <div className="flex flex-col items-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-400"></div>
+              {isPyodideLoading && <span className="text-white mt-4">Caricamento interprete Python...</span>}
+            </div>
           </div>
         )}
       </div>

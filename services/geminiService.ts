@@ -9,33 +9,6 @@ if (!API_KEY) {
 
 const ai = new GoogleGenAI({ apiKey: API_KEY });
 
-export async function runPythonCode(code: string): Promise<string> {
-  const model = "gemini-2.5-flash";
-  const prompt = `
-Sei un interprete Python. Esegui il seguente codice Python e restituisci SOLO l'output diretto (stdout).
-- Non aggiungere spiegazioni, commenti, o la parola "Output:".
-- Se il codice produce un errore, restituisci SOLO il messaggio di errore standard di Python (stderr).
-- Se il codice non produce alcun output visibile (ad es. solo assegnazioni di variabili), restituisci una stringa vuota.
-
-Codice da eseguire:
-\`\`\`python
-${code}
-\`\`\`
-`;
-
-  try {
-    const response = await ai.models.generateContent({
-      model: model,
-      contents: prompt,
-    });
-    const text = response.text;
-    return text ? text.trim() : "";
-  } catch (error) {
-    console.error("Gemini API error in runPythonCode:", error);
-    return "Errore di comunicazione con l'API di Gemini.";
-  }
-}
-
 export async function explainCode(code: string): Promise<string> {
   const model = "gemini-2.5-flash";
   const prompt = `
