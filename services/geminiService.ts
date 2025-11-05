@@ -1,4 +1,5 @@
 
+
 import { GoogleGenAI } from "@google/genai";
 
 const API_KEY = process.env.API_KEY;
@@ -27,7 +28,8 @@ ${code}
       model: model,
       contents: prompt,
     });
-    return response.text.trim();
+    const text = response.text;
+    return text ? text.trim() : "";
   } catch (error) {
     console.error("Gemini API error in runPythonCode:", error);
     return "Errore di comunicazione con l'API di Gemini.";
@@ -37,10 +39,10 @@ ${code}
 export async function explainCode(code: string): Promise<string> {
   const model = "gemini-2.5-flash";
   const prompt = `
-Sei un tutor di Python esperto. Spiega il seguente codice Python a un principiante in italiano.
-- Sii chiaro, conciso e incoraggiante.
-- Suddividi la spiegazione in passaggi logici.
-- Usa un linguaggio semplice.
+Sei un tutor di Python esperto. Spiega il seguente codice Python a un principiante in italiano in modo MOLTO conciso.
+- La spiegazione non deve superare i 3 punti principali.
+- Usa un linguaggio estremamente semplice e diretto.
+- Sii breve.
 
 Codice da spiegare:
 \`\`\`python
@@ -52,7 +54,8 @@ ${code}
       model: model,
       contents: prompt,
     });
-    return response.text;
+    const text = response.text;
+    return text ?? "Impossibile generare una spiegazione per questo codice.";
   } catch (error) {
     console.error("Gemini API error in explainCode:", error);
     return "Errore di comunicazione con l'API di Gemini.";
