@@ -1,0 +1,5 @@
+{
+  "name": "PyLearner - Impara Python con l'IA",
+  "description": "Un'app web interattiva per imparare le basi di Python, con spiegazioni, esecuzione di codice e feedback generati dall'intelligenza artificiale.",
+  "requestFramePermissions": []
+}
