@@ -92,7 +92,21 @@ export const CURRICULUM: Chapter[] = [
         starterCode: `linee_da_scrivere = ["Prima riga.", "Seconda riga."]\n\n# Scrivi le linee in un file 'note.txt'\n\n# Rileggi il file e stampa il suo contenuto`,
         exercisePrompt: `Completa il codice. Prima, apri 'note.txt' in modalità scrittura ('w') e scrivi ogni linea dalla lista. Poi, riapri lo stesso file in modalità lettura ('r'), leggi tutto il contenuto e stampalo.`,
         solution: `linee_da_scrivere = ["Prima riga.\\n", "Seconda riga.\\n"]\n\n# Scrivi nel file\nwith open('note.txt', 'w') as file:\n    file.writelines(linee_da_scrivere)\n\n# Leggi dal file\nwith open('note.txt', 'r') as file:\n    contenuto = file.read()\n    print("Contenuto del file:")\n    print(contenuto)`
-      }
+      },
+      {
+        title: 'Moduli e Pacchetti',
+        content: `Nessun programmatore scrive tutto da zero! Python ti permette di organizzare il codice in 'moduli' (singoli file .py) e di usare moduli scritti da altri. La libreria standard di Python è ricca di moduli utili. Si usa la parola chiave 'import' per rendere disponibile il codice di un modulo, come il modulo 'math' per le operazioni matematiche.`,
+        starterCode: `import math\n\n# Usa una funzione dal modulo math per calcolare la radice quadrata\nradice = math.sqrt(16)\n\nprint(f"La radice quadrata di 16 è {radice}")`,
+        exercisePrompt: `Importa il modulo 'random'. Usa la funzione 'random.randint(1, 10)' per generare e stampare un numero intero casuale compreso tra 1 e 10.`,
+        solution: `import random\n\nnumero_casuale = random.randint(1, 10)\nprint(f"Numero casuale generato: {numero_casuale}")`
+      },
+      {
+        title: 'Argomenti Flessibili (*args, **kwargs)',
+        content: `A volte vuoi creare funzioni che possano accettare un numero variabile di argomenti. Python lo permette con *args e **kwargs. '*args' raccoglie tutti gli argomenti posizionali extra in una tupla. '**kwargs' raccoglie tutti gli argomenti con parola chiave extra in un dizionario.`,
+        starterCode: `def calcola_media(*numeri):\n    # Calcola la media dei numeri passati\n    pass\n\nprint(calcola_media(10, 20, 30))\nprint(calcola_media(5, 10, 15, 20))`,
+        exercisePrompt: `Completa la funzione 'calcola_media' per calcolare e restituire la media di un numero qualsiasi di argomenti. Se non vengono passati numeri (la tupla 'numeri' è vuota), la funzione dovrebbe restituire 0.`,
+        solution: `def calcola_media(*numeri):\n    if not numeri:\n        return 0\n    return sum(numeri) / len(numeri)\n\nprint(f"Media 1: {calcola_media(10, 20, 30)}")\nprint(f"Media 2: {calcola_media(5, 10, 15, 20)}")`
+      },
     ]
   },
   {
@@ -111,7 +125,40 @@ export const CURRICULUM: Chapter[] = [
             starterCode: `class Animale:\n    def __init__(self, nome):\n        self.nome = nome\n\n    def parla(self):\n        return "Suono generico di animale"\n\nclass Cane(Animale):\n    # Sovrascrivi il metodo parla per il Cane\n    pass\n\nfido = Cane("Fido")\nprint(f"{fido.nome} fa: {fido.parla()}")`,
             exercisePrompt: `Nella classe 'Cane', sovrascrivi (override) il metodo 'parla' in modo che restituisca la stringa "Bau!".`,
             solution: `class Animale:\n    def __init__(self, nome):\n        self.nome = nome\n\n    def parla(self):\n        return "Suono generico di animale"\n\nclass Cane(Animale):\n    def parla(self):\n        return "Bau!"\n\nfido = Cane("Fido")\nprint(f"{fido.nome} fa: {fido.parla()}")`
-        }
+        },
+        {
+          title: 'Incapsulamento (Attributi Privati)',
+          content: `L'incapsulamento è l'idea di raggruppare dati (attributi) e i metodi che operano su di essi all'interno di un unico oggetto. Una parte importante è nascondere i dettagli interni di un oggetto. In Python, si usa una convenzione: un trattino basso (es. _saldo) suggerisce che un attributo è per uso interno, mentre due trattini bassi (es. __saldo) attivano il 'name mangling', rendendo più difficile l'accesso dall'esterno.`,
+          starterCode: `class ContoBancario:\n    def __init__(self, titolare, saldo_iniziale):\n        self.titolare = titolare\n        self.__saldo = saldo_iniziale # Attributo 'privato'\n\n    def deposita(self, importo):\n        if importo > 0:\n            self.__saldo += importo\n            print(f"Depositati {importo} EUR.")\n\n    def preleva(self, importo):\n        # Aggiungi il controllo sul saldo\n        pass\n\n    def get_saldo(self):\n        return f"Saldo attuale: {self.__saldo} EUR"\n\nconto = ContoBancario("Mario", 1000)\nconto.deposita(200)\nconto.preleva(1500) # Questo non dovrebbe funzionare\nprint(conto.get_saldo())`,
+          exercisePrompt: `Completa il metodo 'preleva'. Dovrebbe sottrarre l'importo dal saldo solo se l'importo è positivo E se c'è abbastanza saldo disponibile. Stampa un messaggio di successo o di errore.`,
+          solution: `class ContoBancario:\n    def __init__(self, titolare, saldo_iniziale):\n        self.titolare = titolare\n        self.__saldo = saldo_iniziale\n\n    def deposita(self, importo):\n        if importo > 0:\n            self.__saldo += importo\n            print(f"Depositati {importo} EUR.")\n\n    def preleva(self, importo):\n        if importo > 0 and self.__saldo >= importo:\n            self.__saldo -= importo\n            print(f"Prelevati {importo} EUR.")\n        else:\n            print("Prelievo non riuscito: fondi insufficienti o importo non valido.")\n\n    def get_saldo(self):\n        return f"Saldo attuale: {self.__saldo} EUR"\n\nconto = ContoBancario("Mario", 1000)\nconto.deposita(200)\nconto.preleva(1500)\nconto.preleva(500)\nprint(conto.get_saldo())`
+        },
+        {
+            title: 'Metodi Speciali (Dunder)',
+            content: `I metodi speciali, spesso chiamati "dunder methods" (da Double Underscore), permettono alle tue classi di integrarsi con il comportamento nativo di Python. Ad esempio, definendo il metodo '__str__', puoi personalizzare cosa viene stampato quando usi print() su un oggetto. Con '__len__', puoi usare la funzione len() su di esso.`,
+            starterCode: `class MazzoDiCarte:\n    def __init__(self):\n        self.carte = ["Asso", "Re", "Regina", "Jack"] * 4\n\n    def __str__(self):\n        # Restituisci una stringa descrittiva\n        return "Un mazzo di carte"\n\n    def __len__(self):\n        # Restituisci il numero di carte\n        return 0\n\nmazzo = MazzoDiCarte()\nprint(mazzo) # Dovrebbe usare __str__\nprint(f"Numero di carte: {len(mazzo)}") # Dovrebbe usare __len__`,
+            exercisePrompt: `Implementa i metodi '__str__' e '__len__'. '__str__' dovrebbe restituire una stringa come 'Mazzo con 16 carte'. '__len__' dovrebbe restituire il numero effettivo di carte nella lista 'self.carte'.`,
+            solution: `class MazzoDiCarte:\n    def __init__(self):\n        self.carte = ["Asso", "Re", "Regina", "Jack"] * 4\n\n    def __str__(self):\n        return f"Mazzo con {len(self.carte)} carte"\n\n    def __len__(self):\n        return len(self.carte)\n\nmazzo = MazzoDiCarte()\nprint(mazzo)\nprint(f"Numero di carte: {len(mazzo)}")`
+        },
+    ]
+  },
+  {
+    title: 'Concetti Avanzati',
+    lessons: [
+      {
+        title: 'Decoratori',
+        content: `I decoratori sono una funzionalità potente di Python. Un decoratore è una funzione che prende un'altra funzione come argomento, aggiunge qualche tipo di funzionalità e poi restituisce un'altra funzione, il tutto senza alterare il codice della funzione originale. Si usano con la sintassi '@nome_decoratore'.`,
+        starterCode: `import time\n\ndef timer(func):\n    def wrapper(*args, **kwargs):\n        # Il tuo codice qui\n        risultato = func(*args, **kwargs)\n        # E qui\n        return risultato\n    return wrapper\n\n@timer\ndef calcolo_lento():\n    time.sleep(1)\n    print("Calcolo completato!")\n\ncalcolo_lento()`,
+        exercisePrompt: `Completa il decoratore 'timer'. Prima di chiamare la funzione originale (func), stampa "Inizio esecuzione...". Dopo averla chiamata, calcola e stampa il tempo trascorso in secondi.`,
+        solution: `import time\n\ndef timer(func):\n    def wrapper(*args, **kwargs):\n        start_time = time.time()\n        print(f"Inizio esecuzione di '{func.__name__}'...")\n        risultato = func(*args, **kwargs)\n        end_time = time.time()\n        print(f"Fine esecuzione. Tempo trascorso: {end_time - start_time:.4f} secondi.")\n        return risultato\n    return wrapper\n\n@timer\ndef calcolo_lento():\n    time.sleep(1)\n    print("Calcolo completato!")\n\ncalcolo_lento()`
+      },
+      {
+        title: 'Generatori e Yield',
+        content: `I generatori sono un modo speciale per creare iteratori. Invece di costruire e restituire una lista completa, che potrebbe usare molta memoria, i generatori producono i valori uno alla volta usando la parola chiave 'yield'. La funzione 'si mette in pausa' a ogni 'yield', per poi riprendere da quel punto alla successiva richiesta.`,
+        starterCode: `def conto_alla_rovescia(n):\n    print("Inizio conto alla rovescia!")\n    while n > 0:\n        # 'yield' invia un valore e mette in pausa la funzione\n        n -= 1\n\n# Itera sul generatore\nfor numero in conto_alla_rovescia(3):\n    print(numero)`,
+        exercisePrompt: `Completa la funzione generatore 'conto_alla_rovescia'. Dovrebbe usare 'yield' per restituire il valore corrente di 'n' all'interno del ciclo 'while', prima di decrementarlo.`,
+        solution: `def conto_alla_rovescia(n):\n    print("Inizio conto alla rovescia!")\n    while n > 0:\n        yield n\n        n -= 1\n\nprint("Conto alla rovescia da 3:")\nfor numero in conto_alla_rovescia(3):\n    print(numero)`
+      }
     ]
   },
   {
@@ -151,6 +198,27 @@ export const CURRICULUM: Chapter[] = [
         starterCode: `import matplotlib.pyplot as plt\n\nmesi = ['Gen', 'Feb', 'Mar']\nricavi = [1000, 1200, 1500]\n\n# Crea un grafico a barre dei ricavi per mese`,
         exercisePrompt: `Usa Matplotlib per creare un grafico a barre ('plt.bar()') che mostri i ricavi per ogni mese. Aggiungi un titolo al grafico chiamato "Ricavi Trimestrali".`,
         solution: `import matplotlib.pyplot as plt\n\nmesi = ['Gen', 'Feb', 'Mar']\nricavi = [1000, 1200, 1500]\n\nplt.bar(mesi, ricavi)\nplt.title("Ricavi Trimestrali")\nplt.xlabel("Mese")\nplt.ylabel("Ricavi (€)")\n\n# In un ambiente locale, plt.show() mostrerebbe il grafico.\nprint("Codice per il grafico a barre generato correttamente.")`
+      },
+      {
+        title: 'Unire DataFrame (Merge & Join)',
+        content: "Spesso i dati sono suddivisi in più tabelle. Pandas, proprio come SQL, permette di combinare DataFrame in modo efficiente usando `pd.merge()`. Puoi specificare la colonna (o le colonne) su cui unire e il tipo di join: 'inner' (solo le corrispondenze in entrambe), 'outer' (tutti i dati, con NaN dove mancano), 'left' o 'right'.",
+        starterCode: `import pandas as pd\n\ndf_utenti = pd.DataFrame({\n    'user_id': [1, 2, 3],\n    'nome': ['Alice', 'Bob', 'Carlo']\n})\n\ndf_ordini = pd.DataFrame({\n    'user_id': [2, 3, 4],\n    'prodotto': ['Libro', 'Penna', 'Quaderno']\n})\n\n# Unisci i due DataFrame per vedere quali utenti hanno fatto ordini\nutenti_con_ordini = pd.merge(df_utenti, df_ordini, on='user_id', how='inner')\n\nprint(utenti_con_ordini)`,
+        exercisePrompt: "Modifica il codice per eseguire un 'outer' join invece di un 'inner' join. Assegna il risultato a una variabile `tutti_i_dati` e stampala. Osserva come vengono gestiti gli utenti senza ordini e gli ordini senza utenti.",
+        solution: `import pandas as pd\n\ndf_utenti = pd.DataFrame({\n    'user_id': [1, 2, 3],\n    'nome': ['Alice', 'Bob', 'Carlo']\n})\n\ndf_ordini = pd.DataFrame({\n    'user_id': [2, 3, 4],\n    'prodotto': ['Libro', 'Penna', 'Quaderno']\n})\n\ntutti_i_dati = pd.merge(df_utenti, df_ordini, on='user_id', how='outer')\n\nprint(tutti_i_dati)`
+      },
+      {
+        title: 'Gestire Dati Mancanti',
+        content: "I dati nel mondo reale sono raramente perfetti e spesso contengono valori mancanti, rappresentati in Pandas come 'NaN' (Not a Number). Gestire questi dati è cruciale. Puoi decidere di eliminare le righe o colonne con dati mancanti usando `.dropna()` oppure riempire i valori mancanti con un valore specifico (es. la media o la mediana) usando `.fillna()`.",
+        starterCode: `import pandas as pd\nimport numpy as np\n\ndati = {\n    'A': [1, 2, np.nan, 4],\n    'B': [5, np.nan, np.nan, 8],\n    'C': [10, 20, 30, 40]\n}\ndf = pd.DataFrame(dati)\n\nprint("DataFrame originale:")\nprint(df)\n\n# Il tuo codice per gestire i dati mancanti qui`,
+        exercisePrompt: "Completa il codice. Prima, usa `.fillna()` per sostituire i valori NaN nella colonna 'B' con il valore 0. Poi, usa `.dropna()` per rimuovere le righe che hanno ancora valori NaN (che a questo punto sarà solo la riga della colonna 'A'). Stampa il DataFrame pulito.",
+        solution: `import pandas as pd\nimport numpy as np\n\ndati = {\n    'A': [1, 2, np.nan, 4],\n    'B': [5, np.nan, np.nan, 8],\n    'C': [10, 20, 30, 40]\n}\ndf = pd.DataFrame(dati)\n\nprint("DataFrame originale:")\nprint(df)\n\ndf['B'] = df['B'].fillna(0)\ndf_pulito = df.dropna()\n\nprint("\\nDataFrame pulito:")\nprint(df_pulito)`
+      },
+      {
+        title: 'Grafici a Dispersione (Scatter Plot)',
+        content: "Un grafico a dispersione (scatter plot) è ideale per visualizzare la relazione tra due variabili numeriche. Ogni punto nel grafico rappresenta un'osservazione. Questo tipo di grafico può aiutarti a identificare correlazioni, cluster o valori anomali (outlier) nei tuoi dati. In Matplotlib, si crea con `plt.scatter()`.",
+        starterCode: `import matplotlib.pyplot as plt\nimport numpy as np\n\n# Genera dati casuali correlati\nnp.random.seed(42) # per la riproducibilità\nore_studio = np.random.rand(50) * 10\npunteggio_esame = ore_studio * 7 + np.random.randn(50) * 10 + 15\npunteggio_esame = np.clip(punteggio_esame, 0, 100) # Limita i punteggi tra 0 e 100\n\n# Crea lo scatter plot qui`,
+        exercisePrompt: "Usa `plt.scatter()` per creare un grafico a dispersione con 'ore_studio' sull'asse x e 'punteggio_esame' sull'asse y. Aggiungi un titolo al grafico 'Ore di Studio vs. Punteggio Esame' e etichette per l'asse x ('Ore di Studio') e l'asse y ('Punteggio Esame').",
+        solution: `import matplotlib.pyplot as plt\nimport numpy as np\n\nnp.random.seed(42)\nore_studio = np.random.rand(50) * 10\npunteggio_esame = ore_studio * 7 + np.random.randn(50) * 10 + 15\npunteggio_esame = np.clip(punteggio_esame, 0, 100)\n\nplt.scatter(ore_studio, punteggio_esame)\nplt.title("Ore di Studio vs. Punteggio Esame")\nplt.xlabel("Ore di Studio")\nplt.ylabel("Punteggio Esame")\n\nprint("Codice per lo scatter plot generato correttamente.")`
       }
     ],
   },
