@@ -5,7 +5,7 @@ export const CURRICULUM: Chapter[] = [
     title: 'Introduzione a Python',
     lessons: [
       {
-        title: 'Ciao, Mondo!',
+        title: 'Ciao, Busaccone!',
         content: `Benvenuto su PyLearner! Iniziamo con il programma più classico: stampare un messaggio a schermo. In Python, la funzione 'print()' è usata per visualizzare output. Il testo, chiamato stringa, deve essere racchiuso tra virgolette (""). Prova a eseguire il codice per vedere il risultato!`,
         starterCode: `print("Ciao, Python!")`,
         exercisePrompt: `Modifica il codice per stampare il messaggio "Python è fantastico!" invece di "Ciao, Python!".`,
