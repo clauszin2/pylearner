@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 export const PythonIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -13,19 +12,23 @@ export const PythonIcon = (props: React.SVGProps<SVGSVGElement>) => (
     {...props}
   >
     <path
-      fill="#3776AB" // Python Blue
+      fill="currentColor"
+      className="text-indigo-500"
       d="M15 21v-4.5a3.5 3.5 0 0 0-7 0V21"
     />
     <path
-      stroke="#3776AB" // Python Blue
+      stroke="currentColor"
+      className="text-indigo-500"
       d="M12 11.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"
     />
     <path
-      fill="#FFD43B" // Python Yellow
+      fill="currentColor"
+      className="text-yellow-400"
       d="M9 3v4.5a3.5 3.5 0 0 0 7 0V3"
     />
     <path
-      stroke="#FFD43B" // Python Yellow
+      stroke="currentColor"
+      className="text-yellow-400"
       d="M12 12.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z"
     />
   </svg>

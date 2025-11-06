@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import LessonPanel from './components/LessonPanel';
@@ -6,77 +5,94 @@ import CodeEditor from './components/CodeEditor';
 import OutputConsole from './components/OutputConsole';
 import Header from './components/Header';
 import { CURRICULUM } from './constants';
-import { useCurriculum } from './hooks/useCurriculum';
-import { usePyodide } from './hooks/usePyodide';
-import { explainCode } from './services/geminiService';
+import { runPythonCode, explainCode } from './services/geminiService';
+import type { Lesson } from './types';
 
 const App: React.FC = () => {
+  const [currentChapterIndex, setCurrentChapterIndex] = useState<number>(0);
+  const [currentLessonIndexInChapter, setCurrentLessonIndexInChapter] = useState<number>(0);
   const [userCode, setUserCode] = useState<string>('');
   const [output, setOutput] = useState<string>("L'output del tuo codice apparirà qui.");
-  const [isApiLoading, setIsApiLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
 
-  const {
-    currentLesson,
-    currentChapterIndex,
-    currentLessonIndexInChapter,
-    isLastLesson,
-    handleSelectLesson,
-    handleNextLesson,
-  } = useCurriculum();
-
-  // I setter di stato di useState sono stabili, non serve useCallback
-  const { isPyodideLoading, runPython } = usePyodide(setOutput);
+  const currentLesson: Lesson = CURRICULUM[currentChapterIndex].lessons[currentLessonIndexInChapter];
 
   useEffect(() => {
     setUserCode(currentLesson.starterCode);
-    // Questo effetto si attiva al cambio di lezione. Se Pyodide sta ancora caricando,
-    // il messaggio di caricamento rimarrà. Una volta pronto, imposterà il
-    // messaggio di benvenuto per la lezione corrente.
-    if (!isPyodideLoading) {
-      setOutput(`Benvenuto/a alla lezione: ${currentLesson.title}.\nScrivi il codice e premi 'Esegui Codice'.`);
-    }
-  }, [currentLesson, isPyodideLoading]);
+    setOutput(`Benvenuto/a alla lezione: ${currentLesson.title}.\nScrivi il codice e premi 'Esegui Codice'.`);
+  }, [currentChapterIndex, currentLessonIndexInChapter, currentLesson]);
 
   const handleRunCode = useCallback(async () => {
     if (!userCode.trim()) {
       setOutput("Errore: L'editor di codice è vuoto.");
       return;
     }
-
-    setIsApiLoading(true);
-    setOutput('Esecuzione in locale...');
-    const result = await runPython(userCode);
-    setOutput(result);
-    setIsApiLoading(false);
-  }, [userCode, runPython]);
+    setIsLoading(true);
+    setOutput('Esecuzione del codice...');
+    try {
+      const result = await runPythonCode(userCode);
+      setOutput(result);
+    } catch (error) {
+      console.error('Error running code:', error);
+      setOutput('Si è verificato un errore durante l\'esecuzione del codice. Controlla la console per i dettagli.');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [userCode]);
 
   const handleExplainCode = useCallback(async () => {
     if (!userCode.trim()) {
       setOutput("Errore: L'editor di codice è vuoto.");
       return;
     }
-    setIsApiLoading(true);
-    setOutput('Spiegazione del codice in corso (via API)...');
+    setIsLoading(true);
+    setOutput('Spiegazione del codice in corso...');
     try {
       const explanation = await explainCode(userCode);
       setOutput(explanation);
     } catch (error) {
       console.error('Error explaining code:', error);
-      setOutput("Si è verificato un errore durante la richiesta di spiegazione.");
+      setOutput('Si è verificato un errore durante la richiesta di spiegazione. Controlla la console per i dettagli.');
     } finally {
-      setIsApiLoading(false);
+      setIsLoading(false);
     }
   }, [userCode]);
 
+  const handleSelectLesson = useCallback((chapterIndex: number, lessonIndex: number) => {
+    setCurrentChapterIndex(chapterIndex);
+    setCurrentLessonIndexInChapter(lessonIndex);
+    setIsSidebarOpen(false); // Chiude la sidebar dopo la selezione su mobile
+  }, []);
+
+  const handleNextLesson = useCallback(() => {
+    const currentChapter = CURRICULUM[currentChapterIndex];
+    const isLastLessonInChapter = currentLessonIndexInChapter === currentChapter.lessons.length - 1;
+    const isLastChapter = currentChapterIndex === CURRICULUM.length - 1;
+
+    if (!isLastLessonInChapter) {
+      setCurrentLessonIndexInChapter(prev => prev + 1);
+    } else if (!isLastChapter) {
+      setCurrentChapterIndex(prev => prev + 1);
+      setCurrentLessonIndexInChapter(0);
+    }
+  }, [currentChapterIndex, currentLessonIndexInChapter]);
+  
+  const isLastLesson = 
+    currentChapterIndex === CURRICULUM.length - 1 &&
+    currentLessonIndexInChapter === CURRICULUM[currentChapterIndex].lessons.length - 1;
+
   return (
-    <div className="flex flex-col h-screen bg-gray-900 text-gray-200 font-sans">
-      <Header />
+    <div className="flex flex-col h-screen bg-slate-900 text-slate-200 font-sans">
+      <Header onMenuClick={() => setIsSidebarOpen(true)} />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar
           curriculum={CURRICULUM}
           currentChapterIndex={currentChapterIndex}
           currentLessonIndexInChapter={currentLessonIndexInChapter}
           onSelectLesson={handleSelectLesson}
+          isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
         />
         <main className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-4 p-4 overflow-auto">
           <div className="flex flex-col gap-4">
@@ -92,8 +108,7 @@ const App: React.FC = () => {
               onCodeChange={setUserCode}
               onRunCode={handleRunCode}
               onExplainCode={handleExplainCode}
-              isLoading={isApiLoading}
-              isPyodideLoading={isPyodideLoading}
+              isLoading={isLoading}
             />
             <OutputConsole output={output} />
           </div>
